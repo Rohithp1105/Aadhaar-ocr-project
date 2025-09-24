@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Aadhaar OCR Extraction</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 2rem;
+  }
+  #output {
+    margin-top: 1rem;
+    white-space: pre-wrap;
+    background-color: #f4f4f4;
+    padding: 1rem;
+    border: 1px solid #ddd;
+  }
+</style>
+</head>
+<body>
+<h2>Aadhaar OCR Extraction</h2>
+<input type="file" id="imageUpload" accept="image/*" />
+<button id="extractBtn">Extract</button>
+
+<div id="output">JSON output will appear here.</div>
+
+<script>
+  const extractBtn = document.getElementById('extractBtn');
+  const imageUpload = document.getElementById('imageUpload');
+  const outputDiv = document.getElementById('output');
+
+  extractBtn.addEventListener('click', async () => {
+  if (imageUpload.files.length === 0) {
+    alert('Please upload an image file first.');
+    return;
+  }
+  const file = imageUpload.files[0];
+  const formData = new FormData();
+  formData.append('image', file);
+
+  outputDiv.textContent = 'Processing...';
+
+  try {
+    const response = await fetch('http://localhost:8000/extract_aadhaar/', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      outputDiv.textContent = `Error: ${errorData.detail || response.statusText}`;
+      return;
+    }
+
+    const data = await response.json();
+    outputDiv.textContent = JSON.stringify(data.structured_data, null, 2);
+
+  } catch (error) {
+    outputDiv.textContent = `Error: ${error.message}`;
+  }
+});
+
+</script>
+</body>
+</html>
